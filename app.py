@@ -4,14 +4,10 @@ from PIL import Image
 import urllib.parse
 import re
 
-# --- 1. CONFIGURATION ---
-# 🔴 IMPORTANT: If running locally, paste key here.
-# If deploying to Streamlit Cloud, remove this line and use st.secrets logic
-API_KEY = "AIzaSyC7EKP4cjtnzTws1r3aMCDrCUDH5Wz4oh0"
 
-# Logic to switch between Local Key and Cloud Secrets automatically
 try:
-    
+    if "GEMINI_API_KEY" in st.secrets:
+        API_KEY = st.secrets["GEMINI_API_KEY"]
     
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-2.0-flash')
