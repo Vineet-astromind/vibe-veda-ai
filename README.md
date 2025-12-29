@@ -46,7 +46,7 @@ streamlit run app.py
 
 
 
-## Future Roadmap
+## more features that you can add
 Add "Myntra" direct API integration.
 
 Create a "Moodboard History" to save past vibes.
