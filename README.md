@@ -37,10 +37,12 @@ As a 1st-semester student, I noticed a gap in how we search. We often see a cool
    ```bash
    git clone [https://github.com/yourusername/vibe-veda-ai.git](https://github.com/yourusername/vibe-veda-ai.git)
 2. Install dependencies:
-   pip install -r requirements.txt
+   
+pip install -r requirements.txt
 
-3. Run the app
-   streamlit run app.py
+4. Run the app
+   
+streamlit run app.py
 
 
 
