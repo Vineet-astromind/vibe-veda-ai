@@ -12,7 +12,6 @@ As a 1st-semester student, I noticed a gap in how we search. We often see a cool
 * **VibeVeda solves this** by using Multimodal AI to translate *pixels* into *culture* (Music, Fashion, Colors).
 
 ##  Key Features
-* ** Multi-Agent System:** Orchestrates 3 AI Agents (Agent Vibe, Agent Swar for Music, Agent Jugad for Budgeting).
 * ** Visual Palette Generator:** Extracts and renders real hexadecimal color swatches from images.
 * ** Occasion Context:** Adjusts recommendations based on where you are going (e.g., "Indian Wedding" vs "Tech Hackathon").
 * ** Smart Integrations:** Generates direct search links for **Spotify** (Music) and **Google Shopping** (Fashion).
