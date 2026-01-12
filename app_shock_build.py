@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 import urllib.parse
+import re  # <--- CRITICAL: Required for extracting the song name
 
 # --- 1. CONFIGURATION & SETUP ---
 st.set_page_config(
@@ -30,6 +31,7 @@ except Exception:
     st.stop()
 
 # --- 3. THE MODEL ---
+# Using 1.5 Flash for speed and stability
 model = genai.GenerativeModel('gemini-2.0-flash')
 
 # --- 4. SIDEBAR (CONTEXT MANAGER) ---
@@ -70,40 +72,48 @@ if uploaded_file is not None:
         else:
             with st.spinner(f"🧠 Orchestrating Agents for '{occasion}'..."):
                 
-                # --- 7. THE "SHOCK & BUILD" PROMPT ---
+                # --- 7. THE "SHOCK & BUILD" PROMPT (WITH HIDDEN TAGS) ---
                 prompt = f"""
                 You are VibeVeda, a Context-Adaptive Style Engine.
                 
                 INPUT DATA:
-                1. Image Analysis: Extract the core visual elements (colors, objects).
-                2. CONTEXT CONSTRAINT: User is going to: '{occasion}' (This is the DOMINANT variable).
+                1. Image Analysis: Extract colors and visual elements.
+                2. CONTEXT CONSTRAINT: '{occasion}' (This is the DOMINANT variable).
 
-                THE CHALLENGE:
-                You must ignore the "standard" vibe of the image if it conflicts with the '{occasion}'.
-                Twist the interpretation to fit the context perfectly. 
-
+                THE TASK:
+                Analyze the image, but TWIST the recommendation to fit the '{occasion}' perfectly.
+                
+                CRITICAL INSTRUCTION:
+                You must explicitly explain the DIFFERENCE between using this look for a '{occasion}' vs. a normal 'Casual Outing'.
+                
                 STRUCTURE YOUR RESPONSE EXACTLY LIKE THIS (Use Markdown):
                 
                 ### 🧠 Context Logic
                 **Input Context:** {occasion}
-                **Adaptation Strategy:** [Explain in 1 sentence HOW you are pivoting the style for this event.]
+                **The Shift:** [Explain in 1 sentence how you are pivoting the style for this event.]
+                
+                ### ⚖️ The Vibe Contrast (Vs. Casual)
+                * **If this was Casual:** [Describe how this item is normally worn. E.g. "You'd wear this with jeans."]
+                * **But for {occasion}:** [Describe the specific change. E.g. "We are swapping jeans for Chinos."]
                 
                 ### 🎨 The Re-Imagined Vibe
-                [Describe the new vibe specifically for {occasion}. Use 3 emotional adjectives.]
+                [Describe the new vibe with 3 emotional adjectives.]
                 
                 ### 🧬 Context-Specific Palette
                 * **Primary:** [Hex Code 1] - [Color Name]
-                * **Secondary:** [Hex Code 2] - [Color Name]
-                * **Accent:** [Hex Code 3] - [Color Name]
+                * **Accent:** [Hex Code 2] - [Color Name]
                 
                 ### 🎵 Audio Match ({occasion} Mix)
                 * **Song:** [Song Name] - [Artist]
-                * **Vibe Check:** [Why this song fits a {occasion}?]
+                * **Reason:** [Why this fits?]
                 
-                ### 🛍️ Strategic Styling (Budget vs Luxury)
-                **The 'Pivot' Item:** [Suggest one item that makes this look work for {occasion}.]
-                **Styling Hack:** [A specific tip to adjust the fit/accessories for {occasion}.]
-                **Budget Pick:** [A cheaper alternative relevant to Indian students]
+                ### 🛍️ Strategic Styling
+                **The Pivot Item:** [Suggest one item that makes this look work for {occasion}.]
+                **Styling Hack:** [A specific tip to adjust the fit.]
+
+                ---
+                IMPORTANT: At the very end, output the specific song name inside brackets like this:
+                [[SONG: Song Name Artist Name]]
                 """
 
                 try:
@@ -111,31 +121,37 @@ if uploaded_file is not None:
                     response = model.generate_content([prompt, image])
                     result_text = response.text
                     
+                    # --- 8. EXTRACT THE SONG NAME (REGEX MAGIC) ---
+                    # Finds [[SONG: ...]] and extracts the text inside
+                    song_match = re.search(r"\[\[SONG: (.*?)\]\]", result_text)
+                    
+                    if song_match:
+                        song_name = song_match.group(1)
+                        # Remove the tag from the user's view to keep it clean
+                        display_text = result_text.replace(song_match.group(0), "")
+                    else:
+                        # Fallback if AI forgets the tag
+                        clean_occ = occasion.split(" (")[0]
+                        song_name = f"{clean_occ} hindi hit song"
+                        display_text = result_text
+
                     st.success("✅ Context Decoded Successfully!")
-                    st.markdown(result_text)
+                    st.markdown(display_text)
                     
-                    # --- 9. UPDATED ACTION BUTTONS ---
+                    # --- 9. DYNAMIC ACTION BUTTONS ---
                     st.divider()
                     st.subheader("⚡ Take Action")
                     
                     col1, col2, col3 = st.columns(3)
                     
-                    # --- 9. UPDATED ACTION BUTTONS (FIXED SPOTIFY) ---
-                    st.divider()
-                    st.subheader("⚡ Take Action")
-                    
-                    col1, col2, col3 = st.columns(3)
-                    
-                    # 🎵 SPOTIFY FIX: Clean the text first!
-                    # Example: "Indian Wedding (Sangeet)" -> "Indian Wedding"
-                    clean_occasion = occasion.split(" (")[0].split(" /")[0]
-                    spotify_query = urllib.parse.quote(f"{clean_occasion} hindi hit songs")
-                    
+                    # 🎵 SPOTIFY (Uses extracted song name)
+                    spotify_query = urllib.parse.quote(song_name)
                     with col1:
-                        # Use the OFFICIAL Open Spotify Search URL
-                        st.link_button("🎵 Open Spotify", f"https://open.spotify.com/search/{spotify_query}")
+                        st.link_button(f"🎵 Play '{song_name}'", f"https://open.spotify.com/search/{spotify_query}")
 
                     # 🛍️ GOOGLE SHOPPING
+                    # Cleans the occasion string for better search results
+                    clean_occasion = occasion.split(" (")[0] 
                     shop_query = urllib.parse.quote(f"{clean_occasion} outfit aesthetic india")
                     with col2:
                         st.link_button("🛍️ Google Shopping", f"https://www.google.com/search?tbm=shop&q={shop_query}")
