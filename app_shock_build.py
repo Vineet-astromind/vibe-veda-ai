@@ -120,14 +120,23 @@ if uploaded_file is not None:
                     
                     col1, col2, col3 = st.columns(3)
                     
-                    # 🎵 FIXED SPOTIFY LINK (Standard Web Search)
-                    spotify_query = urllib.parse.quote(f"{occasion} {occasion} hindi song") 
-                    # Note: Repeating occasion helps keyword relevance
+                    # --- 9. UPDATED ACTION BUTTONS (FIXED SPOTIFY) ---
+                    st.divider()
+                    st.subheader("⚡ Take Action")
+                    
+                    col1, col2, col3 = st.columns(3)
+                    
+                    # 🎵 SPOTIFY FIX: Clean the text first!
+                    # Example: "Indian Wedding (Sangeet)" -> "Indian Wedding"
+                    clean_occasion = occasion.split(" (")[0].split(" /")[0]
+                    spotify_query = urllib.parse.quote(f"{clean_occasion} hindi hit songs")
+                    
                     with col1:
+                        # Use the OFFICIAL Open Spotify Search URL
                         st.link_button("🎵 Open Spotify", f"https://open.spotify.com/search/{spotify_query}")
 
-                    # 🛍️ GOOGLE SHOPPING LINK
-                    shop_query = urllib.parse.quote(f"{occasion} outfit aesthetic india")
+                    # 🛍️ GOOGLE SHOPPING
+                    shop_query = urllib.parse.quote(f"{clean_occasion} outfit aesthetic india")
                     with col2:
                         st.link_button("🛍️ Google Shopping", f"https://www.google.com/search?tbm=shop&q={shop_query}")
                         
