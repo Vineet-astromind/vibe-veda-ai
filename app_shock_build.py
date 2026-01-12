@@ -33,7 +33,7 @@ except Exception:
 # --- 3. THE "BRAIN" (GEMINI MODEL) ---
 # Using 1.5 Flash for stability (works best globally). 
 # You can change to 'gemini-2.0-flash-exp' if you are sure it works in your region.
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 # --- 4. SIDEBAR (CONTEXT MANAGER) ---
 with st.sidebar:
